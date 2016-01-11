@@ -6,17 +6,20 @@
 
 var counter = 0;
 chrome.browserAction.onClicked.addListener(function (tab) {
-    $.get("https://montavista.schoolloop.com/portal/login", function(data) {
-            // load response text into a new page element
-            var fakePage = document.createElement("html");
-            fakePage.innerHTML = data;
-            console.log(fakePage.innerHTML)
-        
-            var page = $(fakePage);
-            var schoolName = $("#page_title_login", page).contents().filter(function() {
-                return this.nodeType == 3;
-            }).text().trim();//test connection success
-            console.log("Background.js connection success: " + schoolName)
+    $.get("https://montavista.schoolloop.com/portal/student_home", function(data) {
+        // load response text into a new page element
+        var SLPage = document.createElement("html");
+        SLPage.innerHTML = data;
+        var page = $(SLPage);
+        var schoolName = $("#page_title_login",page);
+        console.log($("#page_title_login",page))
+        if(schoolName.length){//not logged in
+            console.log("Grade update notifications won't work unless you're logged in!")
+        }
+        else{//logged in
+            console.log("Logged in!")
+            console.log($("span.page_title", page).text())
+        }
     });
 });
 
