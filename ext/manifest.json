@@ -25,6 +25,7 @@
     "contentSettings",
     "notifications",
     "tabs",
+    "alarms",
     "http://*/*",
     "https://*/*"
   ],
