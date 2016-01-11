@@ -22,9 +22,11 @@
 //        }
 //    });
 //});
+chrome.browserAction.onClicked.addListener(function (tab) {
+    checkFunc();   
+});
 
-chrome.alarms.onAlarm.addListener(function( alarm ) {
-  if(alarm.name === "NotificationsAlarm"){
+var checkFunc = function(){
       $.get("https://montavista.schoolloop.com/portal/student_home", function(data) {
         // load response text into a new page element
         var SLPage = document.createElement("html");
@@ -37,9 +39,31 @@ chrome.alarms.onAlarm.addListener(function( alarm ) {
         }
         else{//logged in
             console.log("Logged in!")
+//            console.log($("div.float_l.percent",page).text().trim())
+            //get grades current
+            
+            chrome.storage.sync.get('classes', function (obj) {
+                
+                if(chrome.runtime.lastError)
+                {
+                    console.log("No previous data exists!");
+                    //set data to current and break
+                }
+                else{
+                    //compare each grade and then notify and then set to current
+                    console.log("Previous data retrieved!")
+                    console.table(obj)
+                }
+                
+            });
 //            console.log($("span.page_title", page).text())
         }
     });
+}
+
+chrome.alarms.onAlarm.addListener(function( alarm ) {
+  if(alarm.name === "NotificationsAlarm"){
+    checkFunc();
   }
 });
 
