@@ -28,7 +28,6 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 
 chrome.runtime.onInstalled.addListener(function(){
     chrome.storage.sync.set({classes: {}})
-    checkFunc();
 })
 
 var checkFunc = function(){
