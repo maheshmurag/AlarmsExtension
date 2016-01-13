@@ -28,6 +28,7 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 
 chrome.runtime.onInstalled.addListener(function(){
     chrome.storage.sync.set({classes: {}})
+    checkFunc();
 })
 
 var checkFunc = function(){
@@ -67,6 +68,7 @@ var checkFunc = function(){
                     for(var i = 0 ; i < classArray.length; i++){
                         objToSync[classArray[i].name] = classArray[i].perc;
                     }
+                    console.table(classArray)
                     chrome.storage.sync.set({classes: objToSync});
                     chrome.storage.sync.get('classes', function (obj) {console.log("END:");console.log(obj)});
                     return;
@@ -82,26 +84,26 @@ var checkFunc = function(){
                             arr.push(classArray[i].name)
                         }
                     }
-                    var s = "";
-                    if(arr.length == 1)
-                        s = "Your " + arr[0] + " grade has changed!";
-                    else if(arr.length == 2)
-                        s = "Grades have changed for " + arr[0] + " and " + arr[1] + "!"
-                    else{
-                        s = "Grades have changed for ";
-                        for(var i = 0 ; i < arr.length - 1;  i++){
-                            s += arr[i] +", ";
+                    if(arr.length >0 ){
+                        var s = "";
+                        if(arr.length == 1)
+                            s = "Your " + arr[0] + " grade has changed!";
+                        else if(arr.length == 2)
+                            s = "Grades have changed for " + arr[0] + " and " + arr[1] + "!";
+                        else{
+                            s = "Grades have changed for ";
+                            for(var i = 0 ; i < arr.length - 1;  i++)
+                                s += arr[i] +", ";
+                            s += "and " + arr[arr.length-1] + "!";
                         }
-                        s += "and " + arr[arr.length-1] + "!"
+                        var options = {
+                            type: "basic",
+                            iconUrl: "https://cdn2.iconfinder.com/data/icons/social-productivity-line-art-2/128/notification-512.png",
+                            title: "In The Loop Notification",
+                            message: s
+                        };
+                        chrome.notifications.create("", options, console.log("notification created!"))
                     }
-                    var options = {
-                        type: "basic",
-                        iconUrl: "https://cdn2.iconfinder.com/data/icons/social-productivity-line-art-2/128/notification-512.png",
-                        title: "In The Loop Notification",
-                        message: s
-                    };
-                    chrome.notifications.create("", options, console.log("notification created!"))
-
                     var objToSync = {};
                     for(var i = 0 ; i < classArray.length; i++){
                         objToSync[classArray[i].name] = classArray[i].perc;
@@ -122,7 +124,7 @@ chrome.alarms.onAlarm.addListener(function( alarm ) {
   }
 });
 
-chrome.alarms.create("NotificationsAlarm", {delayInMinutes:150, periodInMinutes:5})
+chrome.alarms.create("NotificationsAlarm", {delayInMinutes:1, periodInMinutes:5})
 
 //example of using a message handler from the inject scripts
 chrome.extension.onMessage.addListener(
