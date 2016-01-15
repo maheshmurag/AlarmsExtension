@@ -23,15 +23,15 @@
 //    });
 //});
 chrome.browserAction.onClicked.addListener(function (tab) {
-    checkFunc();   
+    checkFunc();
 });
 
 chrome.runtime.onInstalled.addListener(function(){
-    chrome.storage.sync.set({classes: {}})
+    chrome.storage.local.set({classes: {}})
 })
 
 var checkFunc = function(){
-    chrome.storage.sync.get('classes', function (obj) {console.log("BEG:");console.log(obj)});
+    chrome.storage.local.get('classes', function (obj) {console.log("BEG:");console.log(obj)});
       $.get("https://montavista.schoolloop.com/portal/student_home", function(data) {
         // load response text into a new page element
         var SLPage = document.createElement("html");
@@ -51,25 +51,29 @@ var checkFunc = function(){
                 var percentNum = 0;
                 if(percent.length != 0)
                     percentNum = parseFloat(percent.substring(0, percent.length-1));
+                var linkStr = "http://montavista.schoolloop.com/" + $("table > tbody > tr > td:nth-child(4) > a", obj).attr('href');
                 var objToPush = {
                     name: className,
-                    perc: percentNum
+                    perc: percentNum,
+                    link: linkStr
                 };
                 classArray.push(objToPush);
             });
             //get grades current
             
-            chrome.storage.sync.get('classes', function (obj) {
+            chrome.storage.local.get('classes', function (obj) {
                 if(Object.keys(obj.classes).length == 0)
                 {
                     var objToSync = {};
+                    var linksToSync = {};
                     console.log("classes is empty")
                     for(var i = 0 ; i < classArray.length; i++){
                         objToSync[classArray[i].name] = classArray[i].perc;
+                        linksToSync[classArray[i].name] = classArray[i].link;
                     }
                     console.table(classArray)
-                    chrome.storage.sync.set({classes: objToSync});
-                    chrome.storage.sync.get('classes', function (obj) {console.log("END:");console.log(obj)});
+                    chrome.storage.local.set({classes: objToSync, links: linksToSync});
+                    chrome.storage.local.get('classes', function (obj) {console.log("END:");console.log(obj)});
                     return;
                 }
                 else{
@@ -102,19 +106,19 @@ var checkFunc = function(){
                             message: s
                         };
                         chrome.notifications.create("", options, console.log("notification created!"))
+                        chrome.notifications.onClicked.addListener(function(tab) {chrome.windows.create({url: obj.links[classArray[i].name]})});
+
                     }
                     var objToSync = {};
                     for(var i = 0 ; i < classArray.length; i++){
                         objToSync[classArray[i].name] = classArray[i].perc;
                     }
-                    chrome.storage.sync.set({classes: objToSync});
-                    chrome.storage.sync.get('classes', function (obj) {console.log("END:");console.log(obj)});
+                    chrome.storage.local.set({classes: objToSync});
+                    chrome.storage.local.get('classes', function (obj) {console.log("END:");console.log(obj)});
                 }
             });
-            
         }
     });
-    
 }
 
 chrome.alarms.onAlarm.addListener(function( alarm ) {
